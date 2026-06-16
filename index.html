@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>テキスト変換フリー | 全角半角・大文字小文字・ひらがなカタカナ変換</title>
+<meta name="description" content="全角と半角、大文字と小文字、ひらがなとカタカナ、逆順など16種類のテキスト変換ツール。無料・登録不要・広告なし。">
+<link rel="canonical" href="https://texttool-free.vercel.app/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"テキスト変換フリー","url":"https://texttool-free.vercel.app/","applicationCategory":"UtilitiesApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"JPY"}}</script>
+<style>
+:root{--primary:#6C63FF;--bg:#0f0f13;--card:#1a1a24;--border:#2a2a3a;--text:#e8e8f0;--muted:#888899;--success:#4ade80}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:linear-gradient(135deg,#6C63FF,#9C88FF);padding:40px 20px 30px;text-align:center}
+header h1{font-size:2rem;font-weight:800}
+header p{margin-top:8px;opacity:.9;font-size:.95rem}
+nav{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+nav a{color:var(--muted);text-decoration:none;font-size:.85rem;padding:4px 12px;border-radius:20px;border:1px solid var(--border)}
+nav a:hover{color:var(--primary);border-color:var(--primary)}
+.container{max-width:900px;margin:0 auto;padding:30px 20px}
+.input-area{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px}
+.input-area h2{font-size:1rem;color:var(--muted);margin-bottom:12px}
+textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:14px;font-size:1rem;font-family:inherit;resize:vertical;min-height:140px;outline:none}
+textarea:focus{border-color:var(--primary)}
+.btn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:24px}
+.btn{background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:14px 16px;cursor:pointer;font-size:.9rem;font-family:inherit;text-align:left;transition:all .2s;display:flex;align-items:center;gap:10px}
+.btn:hover{border-color:var(--primary);background:#1e1e30;transform:translateY(-1px)}
+.btn.active{border-color:var(--success);background:#0f2a1a}
+.btn-label{font-weight:600;display:block}.btn-desc{font-size:.75rem;color:var(--muted);display:block}
+.output-area{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.output-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.output-header h2{font-size:1rem;color:var(--muted)}
+.copy-btn{background:var(--primary);color:white;border:none;border-radius:8px;padding:8px 18px;cursor:pointer;font-size:.875rem;font-family:inherit}
+.output-text{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;min-height:140px;white-space:pre-wrap;word-break:break-all;font-size:1rem;line-height:1.6}
+.stats{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.stat{font-size:.8rem;color:var(--muted)}.stat span{color:var(--text);font-weight:600}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--success);color:#000;padding:12px 20px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+.related-tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:30px;padding-top:30px;border-top:1px solid var(--border)}
+.tool-link{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;text-decoration:none;color:var(--text)}
+.tool-link:hover{border-color:var(--primary)}
+.tool-link .icon{font-size:1.5rem;display:block;margin-bottom:6px}
+.tool-link .name{font-size:.8rem;color:var(--muted)}
+footer{text-align:center;padding:30px 20px;color:var(--muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:40px}
+</style>
+</head>
+<body>
+<header>
+<h1>&#x270D; テキスト変換フリー</h1>
+<p>全角・半角・カタカナ・ひらがな・Base64など16種類の変換ツール。無料・登録不要。</p>
+</header>
+<nav>
+<a href="https://qrtool-topaz.vercel.app">QRコード生成</a>
+<a href="https://jsonfree.vercel.app">JSON整形</a>
+<a href="https://shindan-shirakokun.vercel.app">性格診断</a>
+</nav>
+<div class="container">
+<div class="input-area">
+<h2>&#x1F4DD; 変換するテキストを入力</h2>
+<textarea id="inputText" placeholder="ここにテキストを入力してください..." oninput="updateStats()"></textarea>
+<div class="stats">
+<div class="stat">文字数: <span id="charCount">0</span></div>
+<div class="stat">行数: <span id="lineCount">0</span></div>
+<div class="stat">単語数: <span id="wordCount">0</span></div>
+</div>
+</div>
+<div class="btn-grid">
+<button class="btn" onclick="convert('toFullWidth',this)"><span style="font-size:1.2rem;min-width:26px">A</span><span><span class="btn-label">全角に変換</span><span class="btn-desc">英数字→全角</span></span></button>
+<button class="btn" onclick="convert('toHalfWidth',this)"><span style="font-size:1.2rem;min-width:26px">a</span><span><span class="btn-label">半角に変換</span><span class="btn-desc">全角→半角</span></span></button>
+<button class="btn" onclick="convert('toUpperCase',this)"><span style="font-size:1.2rem;min-width:26px">ABC</span><span><span class="btn-label">大文字に変換</span><span class="btn-desc">abc → ABC</span></span></button>
+<button class="btn" onclick="convert('toLowerCase',this)"><span style="font-size:1.2rem;min-width:26px">abc</span><span><span class="btn-label">小文字に変換</span><span class="btn-desc">ABC → abc</span></span></button>
+<button class="btn" onclick="convert('toKatakana',this)"><span style="font-size:1.2rem;min-width:26px">ア</span><span><span class="btn-label">カタカナに変換</span><span class="btn-desc">ひらがな→カタカナ</span></span></button>
+<button class="btn" onclick="convert('toHiragana',this)"><span style="font-size:1.2rem;min-width:26px">あ</span><span><span class="btn-label">ひらがなに変換</span><span class="btn-desc">カタカナ→ひらがな</span></span></button>
+<button class="btn" onclick="convert('reverse',this)"><span style="font-size:1.2rem;min-width:26px">&#x21A9;</span><span><span class="btn-label">文字列を逆順に</span><span class="btn-desc">テキスト→逆順</span></span></button>
+<button class="btn" onclick="convert('trimSpaces',this)"><span style="font-size:1.2rem;min-width:26px">&#x2702;</span><span><span class="btn-label">空白を削除</span><span class="btn-desc">前後の空白を除去</span></span></button>
+<button class="btn" onclick="convert('removeEmpty',this)"><span style="font-size:1.2rem;min-width:26px">&#x1F5D1;</span><span><span class="btn-label">空行を削除</span><span class="btn-desc">空白行を除去</span></span></button>
+<button class="btn" onclick="convert('addNumbers',this)"><span style="font-size:1.2rem;min-width:26px">1.</span><span><span class="btn-label">行番号を追加</span><span class="btn-desc">各行に番号付け</span></span></button>
+<button class="btn" onclick="convert('toBase64',this)"><span style="font-size:1.2rem;min-width:26px">&#x1F510;</span><span><span class="btn-label">Base64エンコード</span><span class="btn-desc">テキスト→Base64</span></span></button>
+<button class="btn" onclick="convert('fromBase64',this)"><span style="font-size:1.2rem;min-width:26px">&#x1F513;</span><span><span class="btn-label">Base64デコード</span><span class="btn-desc">Base64→テキスト</span></span></button>
+<button class="btn" onclick="convert('capitalize',this)"><span style="font-size:1.2rem;min-width:26px">Aa</span><span><span class="btn-label">先頭を大文字に</span><span class="btn-desc">単語の頭文字大文字</span></span></button>
+<button class="btn" onclick="convert('sortLines',this)"><span style="font-size:1.2rem;min-width:26px">&#x2261;</span><span><span class="btn-label">行を並び替え</span><span class="btn-desc">辞書順ソート</span></span></button>
+<button class="btn" onclick="convert('removeDuplicates',this)"><span style="font-size:1.2rem;min-width:26px">&#x25CB;</span><span><span class="btn-label">重複行を削除</span><span class="btn-desc">同じ行を1つに</span></span></button>
+<button class="btn" onclick="convert('urlEncode',this)"><span style="font-size:1.2rem;min-width:26px">%</span><span><span class="btn-label">URLエンコード</span><span class="btn-desc">日本語→%XX形式</span></span></button>
+</div>
+<div class="output-area">
+<div class="output-header">
+<h2>&#x1F4CB; 変換結果</h2>
+<button class="copy-btn" onclick="copyOutput()">コピー</button>
+</div>
+<div class="output-text" id="outputText">変換ボタンを押すと結果が表示されます</div>
+<div class="stats" style="margin-top:10px">
+<div class="stat">文字数: <span id="outCharCount">-</span></div>
+<div class="stat">行数: <span id="outLineCount">-</span></div>
+</div>
+</div>
+<div class="related-tools">
+<a href="https://qrtool-topaz.vercel.app" class="tool-link"><span class="icon">&#x1F4F1;</span><strong>QRコード</strong><span class="name">無料生成ツール</span></a>
+<a href="https://jsonfree.vercel.app" class="tool-link"><span class="icon">{}</span><strong>JSON整形</strong><span class="name">バリデーター付き</span></a>
+<a href="https://shindan-shirakokun.vercel.app" class="tool-link"><span class="icon">&#x1F52E;</span><strong>性格診断</strong><span class="name">しらこくん診断</span></a>
+</div>
+</div>
+<div class="toast" id="toast">コピーしました!</div>
+<footer>
+<p>テキスト変換フリー | 無料・登録不要・広告なし</p>
+<p style="margin-top:6px">Made with love by しらこくん</p>
+</footer>
+<script>
+function updateStats(){const t=document.getElementById('inputText').value;document.getElementById('charCount').textContent=t.length;document.getElementById('lineCount').textContent=t?t.split('\n').length:0;document.getElementById('wordCount').textContent=t?t.trim().split(/\s+/).filter(Boolean).length:0}
+function setOutput(t){document.getElementById('outputText').textContent=t;document.getElementById('outCharCount').textContent=t.length;document.getElementById('outLineCount').textContent=t?t.split('\n').length:0}
+function convert(type,btn){
+const input=document.getElementById('inputText').value;
+if(!input.trim()){setOutput('テキストを入力してください');return}
+let r='';
+try{switch(type){
+case 'toFullWidth':r=input.replace(/[!-~]/g,c=>String.fromCharCode(c.charCodeAt(0)+0xFEE0));break;
+case 'toHalfWidth':r=input.replace(/[\uFF01-\uFF5E]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)).replace(/\u3000/g,' ');break;
+case 'toUpperCase':r=input.toUpperCase();break;
+case 'toLowerCase':r=input.toLowerCase();break;
+case 'toKatakana':r=input.replace(/[\u3041-\u3096]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60));break;
+case 'toHiragana':r=input.replace(/[\u30A1-\u30F6]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));break;
+case 'reverse':r=[...input].reverse().join('');break;
+case 'trimSpaces':r=input.split('\n').map(l=>l.trim()).join('\n');break;
+case 'removeEmpty':r=input.split('\n').filter(l=>l.trim()).join('\n');break;
+case 'addNumbers':r=input.split('\n').map((l,i)=>(i+1)+'. '+l).join('\n');break;
+case 'toBase64':r=btoa(unescape(encodeURIComponent(input)));break;
+case 'fromBase64':r=decodeURIComponent(escape(atob(input.trim())));break;
+case 'capitalize':r=input.replace(/\b\w/g,c=>c.toUpperCase());break;
+case 'sortLines':r=input.split('\n').sort((a,b)=>a.localeCompare(b,'ja')).join('\n');break;
+case 'removeDuplicates':r=[...new Set(input.split('\n'))].join('\n');break;
+case 'urlEncode':r=encodeURIComponent(input);break;
+default:r=input
+}}catch(e){r='エラー: '+e.message}
+setOutput(r);document.querySelectorAll('.btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active')
+}
+function copyOutput(){navigator.clipboard.writeText(document.getElementById('outputText').textContent).then(()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)})}
+</script>
+</body>
+</html>
